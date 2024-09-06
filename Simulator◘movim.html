@@ -1,0 +1,74 @@
+<!--Simulator◘movim-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Movimiento Parabólico</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    let scene, camera, renderer, ball, clock;
+    let velocity = new THREE.Vector3(80 * Math.cos(Math.PI / 4), 80 * Math.sin(Math.PI / 4), 0); // 45 grados
+    let gravity = new THREE.Vector3(0, -9.8, 0);
+
+    function init() {
+        // Crear la escena
+        scene = new THREE.Scene();
+
+        // Configurar la cámara
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(100, 100, 300);
+
+        // Crear el renderizador
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Crear el proyectil (bola)
+        const geometry = new THREE.SphereGeometry(5, 32, 32);
+        const material = new THREE.MeshBasicMaterial({ color: 0x0077ff });
+        ball = new THREE.Mesh(geometry, material);
+        scene.add(ball);
+
+        // Crear el suelo
+        const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = Math.PI / 2;
+        plane.position.y = -50;
+        scene.add(plane);
+
+        // Reloj para el tiempo
+        clock = new THREE.Clock();
+
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Obtener el tiempo transcurrido
+        let deltaTime = clock.getDelta();
+
+        // Aplicar movimiento parabólico
+        velocity.add(gravity.clone().multiplyScalar(deltaTime)); // Añadir la gravedad
+        ball.position.add(velocity.clone().multiplyScalar(deltaTime)); // Actualizar la posición
+
+        // Verificar si el proyectil toca el suelo
+        if (ball.position.y < 5) {
+            velocity.set(0, 0, 0); // Detener el proyectil
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    init();
+</script>
+</body>
+</html>
